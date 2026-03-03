@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import Image from "next/image"; // Importar Image de Next.js
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation"; // Importar useRouter y useParams
 import { useAuth } from "@/context/AuthContext";
@@ -46,8 +47,7 @@ const MOCK_DATA = {
 export default function EditAdPage() {
   const router = useRouter(); // Inicializar router
   const { user, loading } = useAuth();
-  const params = useParams(); // Obtener params del hook
-  const id = params?.id; // ID del anuncio (podría usarse para cargar datos reales)
+  const { id } = useParams(); // ID del anuncio (podría usarse para cargar datos reales)
 
   const [photos, setPhotos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);

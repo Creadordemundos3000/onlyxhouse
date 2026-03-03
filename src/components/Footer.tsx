@@ -47,7 +47,8 @@ export function Footer() {
           <div>
             <h4 className="text-white font-bold text-lg mb-4">Contacto</h4>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
+              <li><Link href="/contacto" className="hover:text-white transition-colors flex items-center gap-2"><Mail size={16} /> Formulario de Contacto</Link></li>
+              <li className="flex items-center gap-2 mt-2">
                 <Mail size={16} />
                 <a href="mailto:soporte@onlyxhouse.com" className="hover:text-white transition-colors">soporte@onlyxhouse.com</a>
               </li>
