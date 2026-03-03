@@ -4,32 +4,46 @@ import { Footer } from "@/components/Footer";
 
 export default function CookiesPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Política de Cookies</h1>
-        <div className="prose prose-pink max-w-none text-gray-700">
-          <p>
-            Este sitio web utiliza cookies para mejorar la experiencia del usuario y analizar el uso del sitio web.
-          </p>
+      <main className="flex-grow container mx-auto px-4 py-12 max-w-4xl">
+        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6 border-b pb-4">Política de Cookies</h1>
           
-          <h3>1. ¿Qué son las cookies?</h3>
-          <p>
-            Las cookies son pequeños archivos de texto que los sitios web pueden usar para hacer que la experiencia del usuario sea más eficiente.
-          </p>
+          <div className="prose prose-pink max-w-none text-gray-600">
+            <p className="mb-4">
+              OnlyXHouse utiliza cookies propias y de terceros para mejorar la experiencia del usuario, analizar el tráfico y personalizar el contenido y los anuncios.
+            </p>
 
-          <h3>2. Tipos de cookies que utilizamos</h3>
-          <ul>
-            <li><strong>Cookies necesarias:</strong> Ayudan a hacer una página web utilizable activando funciones básicas como la navegación en la página y el acceso a áreas seguras de la página web. La página web no puede funcionar adecuadamente sin estas cookies.</li>
-            <li><strong>Cookies de preferencias:</strong> Permiten a la página web recordar información que cambia la forma en que la página se comporta o el aspecto que tiene, como tu idioma preferido o la región en la que te encuentras.</li>
-            <li><strong>Cookies estadísticas:</strong> Ayudan a los propietarios de páginas web a comprender cómo interactúan los visitantes con las páginas web reuniendo y proporcionando información de forma anónima.</li>
-            <li><strong>Cookies de marketing:</strong> Se utilizan para rastrear a los visitantes en las páginas web. La intención es mostrar anuncios relevantes y atractivos para el usuario individual.</li>
-          </ul>
+            <h3 className="text-xl font-bold text-gray-800 mt-6 mb-3">1. ¿Qué son las cookies?</h3>
+            <p className="mb-4">
+              Una cookie es un pequeño archivo de texto que se almacena en su navegador cuando visita casi cualquier página web. Su utilidad es que la web sea capaz de recordar su visita cuando vuelva a navegar por esa página.
+            </p>
 
-          <h3>3. Gestión de cookies</h3>
-          <p>
-            Puedes permitir, bloquear o eliminar las cookies instaladas en tu equipo mediante la configuración de las opciones del navegador instalado en tu ordenador.
-          </p>
+            <h3 className="text-xl font-bold text-gray-800 mt-6 mb-3">2. Tipos de cookies que utilizamos</h3>
+            <ul className="list-disc pl-5 mb-4 space-y-2">
+              <li><strong>Cookies técnicas:</strong> Son aquellas necesarias para la navegación y el buen funcionamiento de nuestra página web.</li>
+              <li><strong>Cookies de personalización:</strong> Permiten acceder al servicio con características predefinidas (idioma, tipo de navegador, etc.).</li>
+              <li><strong>Cookies de análisis:</strong> Permiten cuantificar el número de usuarios y realizar la medición y análisis estadístico de la utilización que hacen los usuarios del servicio.</li>
+              <li><strong>Cookies publicitarias:</strong> Permiten la gestión de los espacios publicitarios en base a criterios como el contenido editado o la frecuencia en la que se muestran los anuncios.</li>
+            </ul>
+
+            <h3 className="text-xl font-bold text-gray-800 mt-6 mb-3">3. Gestión de cookies</h3>
+            <p className="mb-4">
+              Puede usted permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su ordenador:
+            </p>
+            <ul className="list-disc pl-5 mb-4 space-y-2">
+              <li><a href="#" className="text-pink-600 hover:underline">Google Chrome</a></li>
+              <li><a href="#" className="text-pink-600 hover:underline">Mozilla Firefox</a></li>
+              <li><a href="#" className="text-pink-600 hover:underline">Safari</a></li>
+              <li><a href="#" className="text-pink-600 hover:underline">Microsoft Edge</a></li>
+            </ul>
+
+            <h3 className="text-xl font-bold text-gray-800 mt-6 mb-3">4. Actualizaciones</h3>
+            <p className="mb-4">
+              Esta Política de Cookies puede ser modificada en función de exigencias legislativas, reglamentarias, o con la finalidad de adaptar dicha política a las instrucciones dictadas por la Agencia Española de Protección de Datos.
+            </p>
+          </div>
         </div>
       </main>
       <Footer />

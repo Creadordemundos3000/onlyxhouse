@@ -72,6 +72,7 @@ export default function EditAdPage() {
     if (!user) return; // Esperar a que haya usuario
 
     const loadData = async () => {
+      console.log("Loading ad:", id); // Simulate using ID
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 500));
       
@@ -88,7 +89,7 @@ export default function EditAdPage() {
       setIsLoading(false);
     };
     loadData();
-  }, [setValue]);
+  }, [setValue, user, id]);
 
   const onSubmit = async (data: EditFormValues) => {
     // Simular guardado
@@ -212,7 +213,13 @@ export default function EditAdPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {photos.map((photo, index) => (
                     <div key={index} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 group">
-                      <img src={photo} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
+                      <Image 
+                        src={photo} 
+                        alt={`Foto ${index + 1}`} 
+                        fill 
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, 25vw"
+                      />
                       <button
                         type="button"
                         onClick={() => removePhoto(index)}
