@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { CheckCircle, MessageCircle } from "lucide-react";
 
 interface PremiumProfile {
@@ -28,10 +29,12 @@ export function PremiumGrid() {
           <div key={profile.id} className="relative group cursor-pointer overflow-hidden rounded-md shadow-sm hover:shadow-md transition-shadow">
             {/* Image */}
             <div className="aspect-[2/3] w-full relative bg-gray-200">
-               <img 
+               <Image 
                  src={profile.imageUrl} 
                  alt={profile.name}
-                 className="w-full h-full object-cover"
+                 fill
+                 className="object-cover"
+                 sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                />
                
                {/* Verified Badge */}

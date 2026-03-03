@@ -170,12 +170,12 @@ export default function DashboardPage() {
               {ads.map((ad) => (
                 <div key={ad.id} className="p-6 hover:bg-gray-50 transition-colors flex flex-col md:flex-row gap-6">
                   {/* Imagen */}
-                  <div className="w-full md:w-48 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 relative">
+                  <div className="relative w-full md:w-48 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                     <Image 
                       src={ad.image} 
                       alt={ad.title} 
                       fill 
-                      className="object-cover" 
+                      className="object-cover"
                       sizes="(max-width: 768px) 100vw, 200px"
                     />
                   </div>

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Button, Input, Label, Textarea, Select } from "@/components/ui/FormElements";
@@ -163,7 +164,13 @@ export default function PublishPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {photos.map((photo, index) => (
                     <div key={index} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 group">
-                      <img src={photo} alt={`Foto ${index + 1}`} className="w-full h-full object-cover" />
+                      <Image 
+                        src={photo} 
+                        alt={`Foto ${index + 1}`} 
+                        fill 
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                      />
                       <button
                         type="button"
                         onClick={() => removePhoto(index)}

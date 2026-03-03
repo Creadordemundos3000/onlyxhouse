@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Heart, Phone, MapPin, CheckCircle, Star } from "lucide-react";
 
 interface ListingProfile {
@@ -23,10 +24,12 @@ export function ListingCard({ profile }: { profile: ListingProfile }) {
       {/* Image Section */}
       <div className="w-full sm:w-56 md:w-64 flex-shrink-0 relative bg-gray-100">
         <div className="aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden">
-           <img 
+           <Image 
              src={profile.imageUrl} 
              alt={profile.name}
-             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+             fill
+             className="object-cover group-hover:scale-105 transition-transform duration-500"
+             sizes="(max-width: 640px) 100vw, (max-width: 768px) 224px, 256px"
            />
            {/* Image Overlays */}
            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent text-white flex justify-between items-end">
