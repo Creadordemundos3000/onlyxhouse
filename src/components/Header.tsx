@@ -1,8 +1,20 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Heart, EyeOff, Menu, User, PlusCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export function Header() {
+  const { user } = useAuth();
+  
+  // Check if user is admin
+  const isAdmin = user && (
+    user.email === "admin@onlyxhouse.com" || 
+    user.email === "sergymendoza@gmail.com" ||
+    user.email?.endsWith("@onlyxhouse.com")
+  );
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-md border-b border-gray-200">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -46,10 +58,22 @@ export function Header() {
 
         {/* Right Section: Login */}
         <div className="flex items-center gap-4">
-          <Link href="/login" className="flex items-center gap-2 text-gray-700 font-bold hover:text-blue-600 transition-colors px-3 py-1 rounded-md hover:bg-blue-50">
-            <User size={20} />
-            <span className="hidden sm:inline">Entrar</span>
-          </Link>
+          {user ? (
+            <Link 
+              href={isAdmin ? "/admin" : "/mi-cuenta"} 
+              className="flex items-center gap-2 text-gray-700 font-bold hover:text-blue-600 transition-colors px-3 py-1 rounded-md hover:bg-blue-50"
+            >
+              <User size={20} />
+              <span className="hidden sm:inline">
+                {isAdmin ? "Admin" : "Mi Cuenta"}
+              </span>
+            </Link>
+          ) : (
+            <Link href="/login" className="flex items-center gap-2 text-gray-700 font-bold hover:text-blue-600 transition-colors px-3 py-1 rounded-md hover:bg-blue-50">
+              <User size={20} />
+              <span className="hidden sm:inline">Entrar</span>
+            </Link>
+          )}
           <button className="md:hidden text-gray-700 hover:text-black p-1">
             <Menu size={28} />
           </button>

@@ -11,7 +11,8 @@ import {
   Edit, 
   Trash2, 
   Eye,
-  Loader2
+  Loader2,
+  Check
 } from "lucide-react";
 import { modelService, Model } from "@/services/modelService";
 import { useToast } from "@/context/ToastContext";
@@ -20,6 +21,7 @@ export default function AdminModelsList() {
   const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,11 +49,22 @@ export default function AdminModelsList() {
     }
   };
 
+  const handleApprove = async (id: string) => {
+    try {
+      await modelService.update(id, { status: "active" });
+      addToast("Modelo aprobado exitosamente", "success");
+    } catch (error) {
+      console.error("Error approving model:", error);
+      addToast("Error al aprobar el modelo", "error");
+    }
+  };
+
   const filteredModels = models.filter(model => {
     const matchesSearch = model.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           model.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || model.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStatus = filterStatus === "all" || model.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   if (loading) {
@@ -93,6 +106,17 @@ export default function AdminModelsList() {
         
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Filter className="w-4 h-4 text-gray-500" />
+          <select 
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm w-full sm:w-auto"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">Todos los estados</option>
+            <option value="active">Activos</option>
+            <option value="pending">Pendientes</option>
+            <option value="inactive">Inactivos</option>
+          </select>
+
           <select 
             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm w-full sm:w-auto"
             value={filterCategory}
@@ -159,6 +183,15 @@ export default function AdminModelsList() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {model.status === "pending" && (
+                        <button 
+                          className="p-1 text-green-500 hover:text-green-700 transition-colors bg-green-50 hover:bg-green-100 rounded-md" 
+                          title="Aprobar"
+                          onClick={() => handleApprove(model.id!)}
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                      )}
                       <Link 
                         href={`/admin/modelos/${model.id}/editar`}
                         className="p-1 text-gray-400 hover:text-gray-600 transition-colors" 

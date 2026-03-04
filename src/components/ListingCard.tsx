@@ -2,10 +2,10 @@ import React from "react";
 import Image from "next/image";
 import { Heart, Phone, MapPin, CheckCircle, Star } from "lucide-react";
 
-interface ListingProfile {
-  id: number;
+export interface ListingProfile {
+  id: number | string;
   name: string;
-  age: number;
+  age: number | string;
   nationality: string;
   location: string;
   category: string;

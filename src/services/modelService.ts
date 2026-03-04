@@ -36,6 +36,7 @@ export interface ModelRate {
 
 export interface Model {
   id?: string;
+  userId?: string; // Owner of the model profile
   name: string;
   age: string;
   phone: string;
@@ -96,6 +97,41 @@ export const modelService = {
     } catch (error) {
       console.error("Error fetching models:", error);
       throw error;
+    }
+  },
+
+  // Get by User ID
+  getByUserId: async (userId: string) => {
+    const { db } = checkFirebase();
+    try {
+      const q = query(
+        collection(db, COLLECTION_NAME), 
+        where("userId", "==", userId),
+        orderBy("createdAt", "desc")
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Model[];
+    } catch (error) {
+      console.error("Error fetching user models:", error);
+      // Fallback for missing index or other errors
+      // If index is missing for userId + createdAt, try without orderBy
+      try {
+        const qSimple = query(
+          collection(db, COLLECTION_NAME), 
+          where("userId", "==", userId)
+        );
+        const snapshot = await getDocs(qSimple);
+        return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Model[];
+      } catch (retryError) {
+        console.error("Retry error fetching user models:", retryError);
+        throw retryError;
+      }
     }
   },
 

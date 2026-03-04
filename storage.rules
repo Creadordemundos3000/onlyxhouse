@@ -1,10 +1,30 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email.matches('.*@onlyxhouse[.]com') ||
+        request.auth.token.email == 'sergymendoza@gmail.com' ||
+        request.auth.token.email == 'admin@onlyxhouse.com'
+      );
+    }
+
+    // Models folder - Public read, Admin write
+    match /models/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Default rule: deny everything else
     match /{allPaths=**} {
-      // ⚠️ ADVERTENCIA: Estas reglas permiten que CUALQUIERA suba archivos.
-      // Son solo para desarrollo.
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

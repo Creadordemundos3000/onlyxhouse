@@ -14,10 +14,19 @@ import {
   FileText
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -102,7 +111,10 @@ export default function AdminSidebar() {
         </nav>
 
         <div className="p-4 border-t border-gray-800">
-          <button className="flex items-center gap-3 px-4 py-3 w-full text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 w-full text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             <span>Cerrar Sesión</span>
           </button>

@@ -1,13 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Input, Label } from "@/components/ui/FormElements";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useToast } from "@/context/ToastContext";
 
 // Schema validation
 const registerSchema = z.object({
@@ -26,6 +30,10 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { addToast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -35,10 +43,51 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Registration data:", data);
-    alert("¡Cuenta creada con éxito! (Simulación)");
+    setError(null);
+    try {
+      if (!auth) {
+        throw new Error("El sistema de autenticación no está disponible.");
+      }
+
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      
+      // Update profile with name
+      await updateProfile(userCredential.user, {
+        displayName: data.name
+      });
+
+      // Send verification email
+      await sendEmailVerification(userCredential.user);
+      
+      addToast("Cuenta creada. Por favor verifica tu correo electrónico.", "success");
+      
+      // Redirect to home or admin depending on email
+      // We still redirect, but users might need to verify before accessing sensitive areas
+      if (data.email.includes("@onlyxhouse.com") || data.email === "sergymendoza@gmail.com") {
+        router.push("/admin");
+      } else {
+        // Standard user redirect to dashboard
+        router.push("/mi-cuenta");
+      }
+      
+    } catch (err: unknown) {
+      console.error("Registration error:", err);
+      let message = "Error al crear la cuenta. Por favor intenta nuevamente.";
+      
+      const error = err as { code?: string };
+
+      if (error.code === "auth/email-already-in-use") {
+        message = "Este correo electrónico ya está registrado.";
+      } else if (error.code === "auth/weak-password") {
+        message = "La contraseña es muy débil.";
+      } else if (error.code === "auth/invalid-email") {
+        message = "El correo electrónico no es válido.";
+      }
+      
+      setError(message);
+      addToast(message, "error");
+    }
   };
 
   return (
@@ -60,6 +109,12 @@ export default function RegisterPage() {
           </div>
           
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
+            )}
+
             <div className="space-y-5">
               <div>
                 <Label htmlFor="name">Nombre completo o Alias</Label>
@@ -104,30 +159,26 @@ export default function RegisterPage() {
                   {...register("confirmPassword")}
                 />
               </div>
-              
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="terms"
-                    type="checkbox"
-                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
-                    {...register("terms")}
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="terms" className="font-medium text-gray-700 cursor-pointer">
-                    Soy mayor de 18 años y acepto los <Link href="/legal/condiciones" className="text-pink-600 hover:underline">términos y condiciones</Link>
-                  </label>
-                  {errors.terms && (
-                    <p className="text-xs text-red-500 mt-1">{errors.terms.message}</p>
-                  )}
-                </div>
+
+              <div className="flex items-center">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                  {...register("terms")}
+                />
+                <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
+                  Soy mayor de 18 años y acepto los <Link href="/legal/condiciones" className="text-pink-600 hover:underline">Términos</Link>
+                </label>
               </div>
+              {errors.terms && (
+                <p className="text-sm text-red-500">{errors.terms.message}</p>
+              )}
             </div>
 
             <Button
               type="submit"
-              className="w-full text-base py-3 font-bold shadow-md hover:shadow-lg transform transition-all active:scale-95"
+              className="w-full text-base py-3 font-bold shadow-md hover:shadow-lg transform transition-all active:scale-95 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -139,13 +190,9 @@ export default function RegisterPage() {
                   Creando cuenta...
                 </span>
               ) : (
-                "Registrarse"
+                "Crear cuenta"
               )}
             </Button>
-            
-            <p className="text-xs text-center text-gray-500 mt-4">
-              Al registrarte, aceptas recibir comunicaciones de onlyXhouse.
-            </p>
           </form>
         </div>
       </main>

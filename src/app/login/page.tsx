@@ -1,22 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Label } from "@/components/ui/FormElements";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useToast } from "@/context/ToastContext";
+import { Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(1, "La contraseña es requerida"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { addToast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -26,10 +36,48 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Login data:", data);
-    alert("¡Inicio de sesión exitoso! (Simulación)");
+    setError(null);
+    try {
+      if (!auth) {
+        throw new Error("El sistema de autenticación no está disponible.");
+      }
+
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      addToast("¡Bienvenido de nuevo!", "success");
+      
+      // Redirect logic based on user role
+      const redirectParam = searchParams.get("redirect");
+      if (redirectParam) {
+        router.push(redirectParam);
+      } else {
+        // Check if user is admin
+        const isAdmin = 
+          data.email === "admin@onlyxhouse.com" || 
+          data.email === "sergymendoza@gmail.com" ||
+          data.email.endsWith("@onlyxhouse.com");
+          
+        if (isAdmin) {
+          router.push("/admin");
+        } else {
+          router.push("/mi-cuenta");
+        }
+      }
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      let message = "Error al iniciar sesión. Por favor verifica tus credenciales.";
+      
+      const error = err as { code?: string };
+      
+      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+        message = "Email o contraseña incorrectos.";
+      } else if (error.code === "auth/too-many-requests") {
+        message = "Demasiados intentos fallidos. Por favor intenta más tarde.";
+      }
+      
+      setError(message);
+      addToast(message, "error");
+    }
   };
 
   return (
@@ -50,65 +98,99 @@ export default function LoginPage() {
           </div>
           
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-5">
-              <div>
-                <Label htmlFor="email">Correo electrónico</Label>
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+            
+            <div className="rounded-md shadow-sm -space-y-px">
+              <div className="mb-4">
+                <Label htmlFor="email-address" className="sr-only">Email</Label>
                 <Input
-                  id="email"
+                  id="email-address"
                   type="email"
-                  placeholder="tu@email.com"
-                  error={errors.email?.message}
+                  autoComplete="email"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                  placeholder="Correo electrónico"
                   {...register("email")}
                 />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                )}
               </div>
-              
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label htmlFor="password" className="mb-0">Contraseña</Label>
-                  <a href="#" className="text-xs text-pink-600 hover:underline font-medium">
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
+                <Label htmlFor="password" className="sr-only">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="******"
-                  error={errors.password?.message}
+                  autoComplete="current-password"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
+                  placeholder="Contraseña"
                   {...register("password")}
                 />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                )}
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full text-base py-3 font-bold shadow-md hover:shadow-lg transform transition-all active:scale-95"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Iniciando sesión...
-                </span>
-              ) : (
-                "Iniciar sesión"
-              )}
-            </Button>
-            
-            <p className="text-xs text-gray-500 mt-4 leading-relaxed text-center">
-              Al entrar confirmas que has leído y estás de acuerdo con nuestros{" "}
-              <Link href="/legal/condiciones" className="text-pink-600 hover:underline">términos, condiciones</Link>,{" "}
-              <Link href="/legal/condiciones" className="text-pink-600 hover:underline">condiciones de contratación</Link>,{" "}
-              <Link href="/legal/cookies" className="text-pink-600 hover:underline">políticas de cookies</Link>,{" "}
-              <Link href="/legal/privacidad" className="text-pink-600 hover:underline">privacidad</Link> y{" "}
-              <Link href="/legal/condiciones" className="text-pink-600 hover:underline">contenidos</Link>.
-            </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  Recuérdame
+                </label>
+              </div>
+
+              <div className="text-sm">
+                <Link href="#" className="font-medium text-pink-600 hover:text-pink-500">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                    Iniciando sesión...
+                  </>
+                ) : (
+                  "Iniciar Sesión"
+                )}
+              </Button>
+            </div>
           </form>
         </div>
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <Loader2 className="w-8 h-8 text-pink-600 animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
